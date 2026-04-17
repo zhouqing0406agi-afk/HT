@@ -14,14 +14,12 @@ body {
   display: flex; align-items: center; justify-content: center;
   color: #e0e0e0; padding: 20px;
 }
-
 .container {
   width: 720px; max-width: 100%; padding: 26px 28px;
   background: rgba(255,255,255,0.05); border-radius: 20px;
   border: 1px solid rgba(255,255,255,0.1);
   box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
-
 h1 {
   text-align: center; font-size: 1.75rem; letter-spacing: 6px; margin-bottom: 4px;
   background: linear-gradient(90deg, #e94560, #53d8fb);
@@ -29,24 +27,20 @@ h1 {
 }
 .subtitle {
   text-align: center; font-size: 0.68rem; color: rgba(255,255,255,0.28);
-  letter-spacing: 3px; margin-bottom: 18px;
+  letter-spacing: 3px; margin-bottom: 16px;
 }
 
-/* ── AI 状态栏 ── */
+/* ── AI 状态（精简版，无进度条）── */
 .ai-status {
-  display: flex; align-items: center; gap: 14px;
+  display: flex; justify-content: center; align-items: center; gap: 32px;
   background: rgba(255,255,255,0.05); border-radius: 12px;
-  padding: 10px 16px; margin-bottom: 13px;
+  padding: 10px 20px; margin-bottom: 11px;
   border: 1px solid rgba(255,255,255,0.07);
 }
-.ai-stat { text-align: center; flex-shrink: 0; }
-.ai-stat-label { font-size: 0.62rem; color: rgba(255,255,255,0.36); letter-spacing: 1px; margin-bottom: 3px; }
-.ai-stat-value { font-size: 1rem; font-weight: bold; color: #53d8fb; }
-.xp-wrap { flex: 1; }
-.xp-bg { height: 5px; background: rgba(255,255,255,0.09); border-radius: 3px; overflow: hidden; }
-.xp-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #53d8fb, #e94560); transition: width .6s; }
-.xp-note { font-size: 0.59rem; color: rgba(255,255,255,0.27); margin-top: 2px; text-align: right; }
-.badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.82rem; font-weight: bold; letter-spacing: 1px; }
+.ai-stat { display: flex; align-items: center; gap: 9px; }
+.ai-stat-label { font-size: 0.67rem; color: rgba(255,255,255,0.38); letter-spacing: 1px; }
+.ai-stat-value { font-size: 1.1rem; font-weight: bold; color: #53d8fb; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 0.88rem; font-weight: bold; letter-spacing: 1px; }
 .lv0 { background: rgba(150,150,150,.2); color: #aaa; }
 .lv1 { background: rgba(76,175,80,.2);  color: #81c784; }
 .lv2 { background: rgba(33,150,243,.2); color: #64b5f6; }
@@ -54,8 +48,36 @@ h1 {
 .lv4 { background: rgba(255,152,0,.2);  color: #ffb74d; }
 .lv5 { background: rgba(233,45,96,.2);  color: #f06292; }
 
+/* ── 对局设置栏 ── */
+.session-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  background: rgba(255,255,255,0.04); border-radius: 10px;
+  padding: 8px 16px; margin-bottom: 11px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.sess-set { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: rgba(255,255,255,0.5); }
+.sess-input {
+  width: 58px; padding: 3px 6px;
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 7px; color: #53d8fb; font-size: 0.95rem; text-align: center; outline: none;
+}
+.sess-input:focus { border-color: #53d8fb; }
+.sess-prog {
+  display: flex; align-items: center; gap: 9px; flex: 1; justify-content: flex-end;
+}
+.sess-prog-label { font-size: 0.7rem; color: rgba(255,255,255,0.38); white-space: nowrap; }
+.sess-prog-bg {
+  flex: 1; max-width: 130px; height: 4px;
+  background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden;
+}
+.sess-prog-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, #53d8fb, #e94560); transition: width .4s;
+}
+.sess-prog-text { font-size: 0.78rem; font-weight: bold; color: rgba(255,255,255,0.55); white-space: nowrap; }
+
 /* ── 先后手 ── */
-.choose { margin-bottom: 13px; text-align: center; }
+.choose { margin-bottom: 11px; text-align: center; }
 .choose-label { font-size: 0.7rem; color: rgba(255,255,255,0.4); letter-spacing: 1px; margin-bottom: 7px; }
 .choose-btns { display: flex; gap: 10px; justify-content: center; }
 .cbtn {
@@ -67,16 +89,15 @@ h1 {
 .cbtn:hover { background: rgba(255,255,255,0.09); color: #fff; }
 .cbtn.active { background: rgba(83,216,251,0.15); border-color: #53d8fb; color: #53d8fb; }
 
-/* ── 主区域：棋盘 + 思考面板 ── */
-.game-area { display: flex; gap: 16px; margin-bottom: 13px; align-items: flex-start; }
+/* ── 主区域 ── */
+.game-area { display: flex; gap: 16px; margin-bottom: 11px; align-items: flex-start; }
 
-/* ── 棋盘（固定尺寸，永不变形）── */
+/* ── 棋盘（尺寸完全固定）── */
 .board {
   display: grid;
   grid-template-columns: repeat(3, 90px);
   grid-template-rows: repeat(3, 90px);
-  gap: 8px;
-  flex-shrink: 0;
+  gap: 8px; flex-shrink: 0;
 }
 .cell {
   width: 90px; height: 90px;
@@ -88,39 +109,34 @@ h1 {
   user-select: none; flex-shrink: 0;
 }
 .cell:hover:not(.taken):not(.ai-turn) {
-  background: rgba(83,216,251,0.1);
-  border-color: rgba(83,216,251,0.3);
-  transform: scale(1.04);
+  background: rgba(83,216,251,0.1); border-color: rgba(83,216,251,0.3); transform: scale(1.04);
 }
 .cell.taken, .cell.ai-turn { cursor: default; }
 
-/* 棋子符号（绝对定位，不撑大格子）*/
+/* 棋子（绝对定位，不影响格子尺寸）*/
 .cell-mark {
-  font-size: 2.4rem; line-height: 1;
+  font-size: 2.4rem; line-height: 1; pointer-events: none;
   position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%,-50%) scale(1);
-  animation: pop .22s cubic-bezier(.34,1.56,.64,1);
-  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+.cell-mark.new { animation: pop .22s cubic-bezier(.34,1.56,.64,1) forwards; }
+@keyframes pop {
+  from { transform: translate(-50%,-50%) scale(0) rotate(-20deg); opacity: 0; }
+  to   { transform: translate(-50%,-50%) scale(1) rotate(0deg);   opacity: 1; }
 }
 .cell.X .cell-mark { color: #e94560; }
 .cell.O .cell-mark { color: #53d8fb; }
-@keyframes pop {
-  from { transform: translate(-50%,-50%) scale(0) rotate(-20deg); opacity: 0; }
-  to   { transform: translate(-50%,-50%) scale(1) rotate(0); opacity: 1; }
-}
-
 .cell.win-cell { animation: winPulse .65s ease infinite alternate; }
 @keyframes winPulse {
-  from { transform: scale(1);    box-shadow: 0 0 6px rgba(255,215,0,.25); }
-  to   { transform: scale(1.07); box-shadow: 0 0 18px rgba(255,215,0,.65); border-color: rgba(255,215,0,.75); }
+  from { transform: scale(1);    box-shadow: 0 0 6px rgba(255,215,0,.3); }
+  to   { transform: scale(1.07); box-shadow: 0 0 20px rgba(255,215,0,.7); border-color: rgba(255,215,0,.8); }
 }
 
-/* 胜率叠加层（绝对定位，不撑大格子）*/
+/* 胜率叠加（不撑大格子）*/
 .rate-ov {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  animation: fadeIn .2s ease; pointer-events: none; z-index: 2;
+  position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  animation: fadeIn .2s ease;
 }
 .rate-pct { font-size: 1.2rem; font-weight: bold; line-height: 1; }
 .rate-lbl { font-size: 0.56rem; opacity: .6; margin-top: 4px; letter-spacing: 1px; }
@@ -128,8 +144,7 @@ h1 {
 
 /* ── 思考面板 ── */
 .think-panel {
-  flex: 1;
-  background: rgba(0,0,0,0.22); border-radius: 14px;
+  flex: 1; background: rgba(0,0,0,0.22); border-radius: 14px;
   border: 1px solid rgba(255,255,255,0.06); padding: 13px;
   height: 286px; display: flex; flex-direction: column; overflow: hidden;
 }
@@ -138,46 +153,28 @@ h1 {
   padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06);
   margin-bottom: 8px; flex-shrink: 0;
 }
-.tp-log {
-  flex: 1; overflow-y: auto;
-  display: flex; flex-direction: column; gap: 3px;
-}
+.tp-log { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; }
 .tp-log::-webkit-scrollbar { width: 2px; }
 .tp-log::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 1px; }
-
-/* 思考面板条目 */
-.tpe { font-size: 0.71rem; animation: slideIn .22s ease; }
-.tpe.info { color: rgba(255,255,255,0.33); font-style: italic; }
-.tpe.scan { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
-.tpe.conclude { color: #53d8fb; font-weight: bold; padding: 3px 0; margin-top: 2px; }
-.tpe.updated {
-  color: #ffd700; font-weight: bold; padding: 6px 8px; margin-top: 5px;
-  background: rgba(255,215,0,0.08); border-radius: 6px;
-  border: 1px solid rgba(255,215,0,0.22);
-  animation: updatedPop .4s ease;
-}
-@keyframes updatedPop {
-  from { transform: scale(0.92); opacity: 0; }
-  to   { transform: scale(1);    opacity: 1; }
-}
-.tp-cname { flex-shrink: 0; width: 36px; color: rgba(255,255,255,0.52); font-size: 0.69rem; }
-.tp-bar { flex: 1; height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
-.tp-fill { height: 100%; border-radius: 2px; }
-.tp-num { flex-shrink: 0; width: 36px; text-align: right; font-size: 0.69rem; font-weight: bold; }
+.tpe { font-size: 0.71rem; animation: slideIn .2s ease; }
+.tpe.info    { color: rgba(255,255,255,0.33); font-style: italic; }
+.tpe.scan    { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
+.tpe.conclude{ color: #53d8fb; font-weight: bold; padding: 3px 0; margin-top: 2px; }
+.tp-cname    { flex-shrink: 0; width: 36px; color: rgba(255,255,255,0.52); font-size: 0.69rem; }
+.tp-bar      { flex: 1; height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
+.tp-fill     { height: 100%; border-radius: 2px; }
+.tp-num      { flex-shrink: 0; width: 36px; text-align: right; font-size: 0.69rem; font-weight: bold; }
 @keyframes slideIn { from { opacity: 0; transform: translateX(-5px); } to { opacity: 1; transform: translateX(0); } }
 
 /* ── 状态栏 ── */
-.status-bar {
-  display: flex; align-items: center; justify-content: center; gap: 7px;
-  height: 29px; margin-bottom: 11px; font-size: 0.87rem;
-}
+.status-bar { display: flex; align-items: center; justify-content: center; gap: 7px; height: 28px; margin-bottom: 10px; font-size: 0.87rem; }
 .s-icon { font-size: 1.05rem; }
 .s-text { color: rgba(255,255,255,0.7); letter-spacing: 1px; }
 .s-blink { color: #53d8fb; animation: blink .85s step-start infinite; }
 @keyframes blink { 50% { opacity: .22; } }
 
 /* ── 分数 ── */
-.score-bar { display: flex; justify-content: space-around; margin-bottom: 13px; text-align: center; }
+.score-bar { display: flex; justify-content: space-around; margin-bottom: 11px; text-align: center; }
 .s-who { font-size: 0.63rem; color: rgba(255,255,255,0.34); letter-spacing: 1px; margin-bottom: 1px; }
 .s-num { font-size: 1.4rem; font-weight: bold; }
 .s-player .s-num { color: #e94560; }
@@ -197,15 +194,22 @@ h1 {
 .overlay.show { display: flex; }
 .dlg {
   background: #16213e; border: 1px solid rgba(255,255,255,0.11); border-radius: 18px;
-  padding: 28px 30px; text-align: center; min-width: 240px;
+  padding: 28px 30px; text-align: center; min-width: 260px; max-width: 340px;
   box-shadow: 0 20px 60px rgba(0,0,0,.6); animation: dlgPop .28s ease;
 }
 @keyframes dlgPop { from { transform: scale(.88) translateY(18px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
 .dlg-emoji { font-size: 2.7rem; margin-bottom: 10px; }
 .dlg-title { font-size: 1.25rem; font-weight: bold; margin-bottom: 5px; }
-.dlg-sub   { font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-bottom: 14px; letter-spacing: 1px; }
-.dlg-lvup  { background: rgba(255,215,0,.09); border: 1px solid rgba(255,215,0,.25); border-radius: 8px; padding: 7px 12px; margin-bottom: 14px; font-size: 0.8rem; color: #ffd700; }
-.dlg-btns  { display: flex; gap: 10px; }
+.dlg-sub   { font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-bottom: 10px; letter-spacing: 1px; }
+.dlg-lvup  { background: rgba(255,215,0,.09); border: 1px solid rgba(255,215,0,.25); border-radius: 8px; padding: 7px 12px; margin-bottom: 10px; font-size: 0.8rem; color: #ffd700; }
+.dlg-rate  { font-size: 0.77rem; color: rgba(83,216,251,0.65); letter-spacing: 1px; margin-bottom: 12px; }
+.dlg-sess  {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 10px 14px; margin-bottom: 12px;
+  font-size: 0.82rem; line-height: 1.9; color: rgba(255,255,255,0.55);
+}
+.dlg-sess .sw { font-size: 0.95rem; font-weight: bold; margin-top: 4px; }
+.dlg-btns { display: flex; gap: 10px; }
 </style>
 </head>
 <body>
@@ -213,21 +217,36 @@ h1 {
   <h1>井字棋</h1>
   <p class="subtitle">TIC · TAC · TOE</p>
 
+  <!-- AI 状态（精简）-->
   <div class="ai-status">
     <div class="ai-stat">
-      <div class="ai-stat-label">练习局数</div>
-      <div class="ai-stat-value" id="gamesCount">0</div>
-    </div>
-    <div class="xp-wrap">
-      <div class="xp-bg"><div class="xp-fill" id="xpBar" style="width:0%"></div></div>
-      <div class="xp-note" id="xpNote">0 / 5</div>
+      <span class="ai-stat-label">练习局数</span>
+      <span class="ai-stat-value" id="gamesCount">0</span>
     </div>
     <div class="ai-stat">
-      <div class="ai-stat-label">熟练度</div>
-      <div id="profBadge" class="badge lv0">萌新</div>
+      <span class="ai-stat-label">熟练度</span>
+      <span id="profBadge" class="badge lv0">萌新</span>
     </div>
   </div>
 
+  <!-- 对局设置 -->
+  <div class="session-bar">
+    <div class="sess-set">
+      <span>对局数量</span>
+      <input type="number" id="sessInput" class="sess-input" min="1" max="100" value="10"
+             oninput="onSessInput()">
+      <span>局</span>
+    </div>
+    <div class="sess-prog">
+      <span class="sess-prog-label">本轮进度</span>
+      <div class="sess-prog-bg">
+        <div class="sess-prog-fill" id="sessProgFill" style="width:0%"></div>
+      </div>
+      <span class="sess-prog-text" id="sessProgText">0 / 10</span>
+    </div>
+  </div>
+
+  <!-- 先后手 -->
   <div class="choose">
     <div class="choose-label">选择先后手</div>
     <div class="choose-btns">
@@ -236,6 +255,7 @@ h1 {
     </div>
   </div>
 
+  <!-- 棋盘 + 思考面板 -->
   <div class="game-area">
     <div class="board" id="board"></div>
     <div class="think-panel">
@@ -246,39 +266,45 @@ h1 {
     </div>
   </div>
 
+  <!-- 状态 -->
   <div class="status-bar">
     <span class="s-icon" id="sIcon">🎮</span>
     <span class="s-text" id="sText">请落子</span>
   </div>
 
+  <!-- 分数 -->
   <div class="score-bar">
     <div class="s-player"><div class="s-who">玩家</div><div class="s-num" id="scoreP">0</div></div>
     <div class="s-draw">  <div class="s-who">平局</div><div class="s-num" id="scoreD">0</div></div>
     <div class="s-ai">    <div class="s-who">电脑</div><div class="s-num" id="scoreA">0</div></div>
   </div>
 
+  <!-- 按钮 -->
   <div class="btn-row">
     <button class="btn btn-s" onclick="resetScores()">清空分数</button>
     <button class="btn btn-p" onclick="newGame()">新局 ▶</button>
   </div>
 </div>
 
+<!-- 结果弹窗 -->
 <div class="overlay" id="overlay">
   <div class="dlg">
     <div class="dlg-emoji" id="dlgE"></div>
     <div class="dlg-title" id="dlgT"></div>
     <div class="dlg-sub"   id="dlgS"></div>
-    <div class="dlg-lvup"  id="dlgLv" style="display:none"></div>
+    <div class="dlg-lvup"  id="dlgLv"   style="display:none"></div>
+    <div class="dlg-rate">✓ 已更新落子胜率</div>
+    <div class="dlg-sess"  id="dlgSess" style="display:none"></div>
     <div class="dlg-btns">
       <button class="btn btn-s" style="flex:1" onclick="closeDialog()">关闭</button>
-      <button class="btn btn-p" style="flex:1" onclick="newGame()">再来一局</button>
+      <button class="btn btn-p" style="flex:1" id="dlgPlayBtn" onclick="newGame()">再来一局</button>
     </div>
   </div>
 </div>
 
 <script>
 // ── 持久化 ──
-const STORE = 'ttt_stats_v2';
+const STORE = 'ttt_stats_v3';
 function loadStats() {
   try { const d = JSON.parse(localStorage.getItem(STORE)); return (d?.games >= 0) ? d : {games:0}; }
   catch { return {games:0}; }
@@ -295,39 +321,36 @@ const LEVELS = [
   {name:'传说', cls:'lv5', min:100, max:Infinity},
 ];
 function getLvIdx(g) {
-  for (let i = LEVELS.length-1; i >= 0; i--) if (g >= LEVELS[i].min) return i;
+  for (let i = LEVELS.length - 1; i >= 0; i--) if (g >= LEVELS[i].min) return i;
   return 0;
 }
 function refreshAIStatus(g) {
-  const li = getLvIdx(g), lv = LEVELS[li], nx = LEVELS[li+1];
   document.getElementById('gamesCount').textContent = g;
   const b = document.getElementById('profBadge');
+  const lv = LEVELS[getLvIdx(g)];
   b.textContent = lv.name; b.className = 'badge ' + lv.cls;
-  const fill = document.getElementById('xpBar'), note = document.getElementById('xpNote');
-  if (nx) {
-    const p = g - lv.min, s = lv.max - lv.min;
-    fill.style.width = Math.min(100, Math.round(p/s*100)) + '%';
-    note.textContent = `${p} / ${s}`;
-  } else { fill.style.width = '100%'; note.textContent = '已满级'; }
 }
 
-// ── 格子名称（用于思考面板）──
+// ── 格子名称 ──
 const CNAMES = ['左上','上方','右上','左侧','中间','右侧','左下','下方','右下'];
 
 // ── 游戏状态 ──
 let board = Array(9).fill(null);
 let pSym = 'X', aSym = 'O';
-let turn  = 'player';
-let over  = false;
-let playerFirst = true;
-let gid   = 0;          // 用于取消旧异步操作
+let turn = 'player', over = false, playerFirst = true, gid = 0;
 let scores = {p:0, a:0, d:0};
 let stats  = loadStats();
 
+// 对局管理
+let sessLen    = 10;
+let sessGames  = 0;
+let sessScores = {p:0, a:0, d:0};
+
 const WINS = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 
-// ── 渲染棋盘 ──
-function renderBoard(winCells = []) {
+// ── 渲染 ──
+// newCell: 只有这个格子的棋子播放入场动画，避免重复动画
+function renderBoard(winCells = [], newCell = -1) {
   const el = document.getElementById('board');
   el.innerHTML = '';
   board.forEach((v, i) => {
@@ -338,7 +361,7 @@ function renderBoard(winCells = []) {
       + (!over && turn === 'ai' ? ' ai-turn' : '');
     if (v) {
       const m = document.createElement('span');
-      m.className = 'cell-mark';
+      m.className = 'cell-mark' + (i === newCell ? ' new' : '');
       m.textContent = v === 'X' ? '✕' : '○';
       c.appendChild(m);
     }
@@ -351,68 +374,133 @@ const getCells = () => document.querySelectorAll('#board .cell');
 function setStatus(icon, text, blink = false) {
   document.getElementById('sIcon').textContent = icon;
   const el = document.getElementById('sText');
-  el.textContent = text;
-  el.className = 's-text' + (blink ? ' s-blink' : '');
+  el.textContent = text; el.className = 's-text' + (blink ? ' s-blink' : '');
 }
 function refreshScores() {
   document.getElementById('scoreP').textContent = scores.p;
   document.getElementById('scoreA').textContent = scores.a;
   document.getElementById('scoreD').textContent = scores.d;
 }
+function refreshSessUI() {
+  const pct = sessLen > 0 ? Math.min(100, Math.round(sessGames / sessLen * 100)) : 0;
+  document.getElementById('sessProgFill').style.width = pct + '%';
+  document.getElementById('sessProgText').textContent = `${sessGames} / ${sessLen}`;
+}
+function onSessInput() {
+  let v = parseInt(document.getElementById('sessInput').value);
+  if (isNaN(v) || v < 1) v = 1;
+  if (v > 100) { v = 100; document.getElementById('sessInput').value = 100; }
+  sessLen = v;
+  refreshSessUI();
+}
 
-// ── 思考面板工具 ──
+// ── 思考面板 ──
 function clearTP() { document.getElementById('tpLog').innerHTML = ''; }
 function addTPRaw(html) {
   const log = document.getElementById('tpLog');
   log.insertAdjacentHTML('beforeend', html);
   log.scrollTop = log.scrollHeight;
 }
-function addTPInfo(t)    { addTPRaw(`<div class="tpe info">${t}</div>`); }
-function addTPConclude(t){ addTPRaw(`<div class="tpe conclude">${t}</div>`); }
-function addTPUpdated()  { addTPRaw(`<div class="tpe updated">✓ 已更新落子胜率</div>`); }
+function addTPInfo(t)     { addTPRaw(`<div class="tpe info">${t}</div>`); }
+function addTPConclude(t) { addTPRaw(`<div class="tpe conclude">${t}</div>`); }
 function addTPScan(name, rate) {
   const hue = Math.round(rate * 1.2);
-  addTPRaw(`
-    <div class="tpe scan">
-      <span class="tp-cname">${name}</span>
-      <div class="tp-bar">
-        <div class="tp-fill" style="width:${rate}%;background:hsl(${hue},70%,44%)"></div>
-      </div>
-      <span class="tp-num" style="color:hsl(${hue},70%,58%)">${rate}%</span>
-    </div>`);
+  addTPRaw(`<div class="tpe scan">
+    <span class="tp-cname">${name}</span>
+    <div class="tp-bar"><div class="tp-fill" style="width:${rate}%;background:hsl(${hue},70%,44%)"></div></div>
+    <span class="tp-num" style="color:hsl(${hue},70%,58%)">${rate}%</span>
+  </div>`);
 }
 
-// ── 胜率映射（minimax 分 -10~+10 → 0~100%）──
-function scoreToRate(s) { return Math.round(((s + 10) / 20) * 100); }
+// ── AI 熟练度曲线（0-9局=纯随机，50局=明显变化，80局=熟练）──
+function getStrength() {
+  const g = stats.games;
+  if (g < 10) return 0;
+  if (g < 50) return (g - 10) / 40 * 0.42;
+  if (g < 80) return 0.42 + (g - 50) / 30 * 0.48;
+  return Math.min(1, 0.9 + (g - 80) / 20 * 0.1);
+}
 
-// ── 在格子上显示胜率 ──
+// 统计当前局面 sym 有多少条"两子+空格"威胁线
+function countThreats(sym) {
+  let n = 0;
+  for (const [a,b,c] of WINS) {
+    const v = [board[a], board[b], board[c]];
+    if (v.filter(x => x === sym).length === 2 && v.includes(null)) n++;
+  }
+  return n;
+}
+
+// 启发式胜率（仅基于局面，不依赖 minimax）
+function heuristicRate(cellIdx) {
+  const ri = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+
+  // 立即获胜？
+  board[cellIdx] = aSym;
+  if (checkWin()) { board[cellIdx] = null; return ri(91, 98); }
+  const aiThreats = countThreats(aSym);
+  board[cellIdx] = null;
+
+  // 必须封堵？
+  board[cellIdx] = pSym;
+  if (checkWin()) { board[cellIdx] = null; return ri(79, 88); }
+  board[cellIdx] = null;
+
+  const pThreats = countThreats(pSym);
+
+  let score = 50;
+  if (aiThreats >= 2) score += 22;       // 双叉
+  else if (aiThreats === 1) score += 11; // 单威胁
+  score += pThreats * 6;                 // 防守价值
+  const POS = [3, 1, 3, 1, 8, 1, 3, 1, 3]; // 位置权重（中心最高）
+  score += POS[cellIdx];
+  score += ri(-4, 4);                    // 轻微随机扰动
+  return Math.max(33, Math.min(90, score));
+}
+
+// 展示胜率 = 启发式 × 熟练度 + 纯随机 × (1 - 熟练度)
+function displayRate(cellIdx) {
+  const str = getStrength();
+  const strat = heuristicRate(cellIdx);
+  const rand  = 40 + Math.floor(Math.random() * 21); // 40-60
+  return Math.round(strat * str + rand * (1 - str));
+}
+
+// 实际落子：按熟练度概率选择随机 or minimax
+function pickMove(empty) {
+  const str = getStrength();
+  if (Math.random() > str) return empty[Math.floor(Math.random() * empty.length)];
+  let bestS = -Infinity, bestM = empty[0];
+  for (const i of empty) {
+    board[i] = aSym;
+    const s = minimax(0, false, -Infinity, Infinity);
+    board[i] = null;
+    if (s > bestS) { bestS = s; bestM = i; }
+  }
+  return bestM;
+}
+
+// ── 胜率叠加层 ──
 function showRate(idx, rate) {
-  const cs = getCells();
-  const c = cs[idx];
+  const c = getCells()[idx];
   if (!c || c.classList.contains('taken')) return;
-  const hue   = Math.round(rate * 1.2);
+  const hue = Math.round(rate * 1.2);
   const alpha = 0.18 + Math.abs(rate - 50) / 50 * 0.38;
-  c.style.background   = `hsla(${hue},75%,27%,${alpha})`;
-  c.style.borderColor  = `hsla(${hue},75%,50%,${alpha + 0.2})`;
+  c.style.background  = `hsla(${hue},75%,27%,${alpha})`;
+  c.style.borderColor = `hsla(${hue},75%,50%,${alpha + 0.2})`;
   const ov = document.createElement('div');
   ov.className = 'rate-ov';
-  ov.innerHTML = `
-    <span class="rate-pct" style="color:hsl(${hue},82%,64%)">${rate}%</span>
-    <span class="rate-lbl" style="color:hsl(${hue},60%,52%)">胜率</span>`;
+  ov.innerHTML = `<span class="rate-pct" style="color:hsl(${hue},82%,64%)">${rate}%</span>
+                  <span class="rate-lbl" style="color:hsl(${hue},60%,52%)">胜率</span>`;
   c.appendChild(ov);
 }
 function highlightBest(idx) {
   const c = getCells()[idx];
-  if (!c) return;
-  c.style.transform   = 'scale(1.08)';
-  c.style.boxShadow   = '0 0 18px rgba(83,216,251,0.6)';
-  c.style.borderColor = 'rgba(83,216,251,0.85)';
+  if (c) { c.style.transform='scale(1.08)'; c.style.boxShadow='0 0 18px rgba(83,216,251,0.6)'; c.style.borderColor='rgba(83,216,251,0.85)'; }
 }
-
-// ── 延迟 ──
 const delay = ms => new Promise(r => setTimeout(r, ms));
 
-// ── 先后手切换 ──
+// ── 先后手 ──
 function setOrder(o) {
   playerFirst = (o === 'first');
   document.getElementById('btnFirst') .classList.toggle('active',  playerFirst);
@@ -425,7 +513,7 @@ function newGame() {
   closeDialog();
   gid++;
   board = Array(9).fill(null);
-  over  = false;
+  over = false;
   clearTP();
   if (playerFirst) {
     pSym = 'X'; aSym = 'O'; turn = 'player';
@@ -436,8 +524,7 @@ function newGame() {
     pSym = 'O'; aSym = 'X'; turn = 'ai';
     setStatus('🤖', '电脑思考中...', true);
     renderBoard();
-    const g = gid;
-    setTimeout(() => runAI(g), 400);
+    const g = gid; setTimeout(() => runAI(g), 400);
   }
 }
 
@@ -446,36 +533,26 @@ function onCellClick(i) {
   if (over || turn !== 'player' || board[i]) return;
   board[i] = pSym;
   const r = checkWin();
-  if (r) { renderBoard(); endGame(r); return; }
+  if (r) { endGame(r, i); return; }
   turn = 'ai';
   setStatus('🤖', '电脑思考中...', true);
-  renderBoard();
-  const g = gid;
-  setTimeout(() => runAI(g), 150);
+  renderBoard([], i);
+  const g = gid; setTimeout(() => runAI(g), 150);
 }
 
-// ── AI 落子（带思考动画）──
+// ── AI 思考动画 + 落子 ──
 async function runAI(g) {
   if (over || g !== gid) return;
-
   const empty = board.map((v,i) => v === null ? i : null).filter(i => i !== null);
   if (!empty.length) return;
 
-  // 计算每个空格的 minimax 分数
-  const rawScores = {}, rates = {};
-  let bestS = -Infinity, bestM = empty[0];
-  for (const i of empty) {
-    board[i] = aSym;
-    const s = minimax(0, false, -Infinity, Infinity);
-    board[i] = null;
-    rawScores[i] = s;
-    rates[i] = scoreToRate(s);
-    if (s > bestS) { bestS = s; bestM = i; }
-  }
+  // 计算所有空格展示胜率，并用熟练度决定实际落子
+  const rates = {};
+  for (const i of empty) rates[i] = displayRate(i);
+  const actualMove = pickMove(empty);
 
-  // ── 思考动画：逐格展示胜率 ──
   clearTP();
-  addTPInfo('开始分析每个落子位置...');
+  addTPInfo(getStrength() < 0.1 ? '随机尝试各个位置...' : '开始分析每个落子位置...');
 
   for (const i of [...empty].sort((a,b) => a - b)) {
     await delay(260);
@@ -487,20 +564,17 @@ async function runAI(g) {
   await delay(360);
   if (g !== gid) return;
 
-  // 高亮最佳格子
-  highlightBest(bestM);
-  addTPConclude(`→ 选择${CNAMES[bestM]}（胜率 ${rates[bestM]}%）`);
+  highlightBest(actualMove);
+  addTPConclude(`→ 选择${CNAMES[actualMove]}（胜率 ${rates[actualMove]}%）`);
 
   await delay(520);
   if (g !== gid) return;
 
-  // 落子，重新渲染（自动清除胜率叠加层）
-  board[bestM] = aSym;
-  turn = 'player';
-  renderBoard();
-
+  board[actualMove] = aSym;
   const r = checkWin();
-  if (r) { endGame(r); return; }
+  if (r) { endGame(r, actualMove); return; }
+  turn = 'player';
+  renderBoard([], actualMove);
   setStatus('🎮', '轮到你了，请落子');
 }
 
@@ -514,45 +588,75 @@ function checkWin() {
   return null;
 }
 
-// ── 结局处理 ──
-function endGame(r) {
+// ── 结局 ──
+function endGame(r, lastCell = -1) {
   over = true;
   const oldLv = getLvIdx(stats.games);
-  stats.games++;
-  saveStats(stats);
-  refreshAIStatus(stats.games);
+  stats.games++; saveStats(stats); refreshAIStatus(stats.games);
   const newLv = getLvIdx(stats.games);
 
-  renderBoard(r.line);
-  addTPUpdated();   // "已更新落子胜率"
+  renderBoard(r.line, lastCell);
 
   let emoji, title, sub;
   if (r.winner === 'draw') {
-    scores.d++; emoji = '🤝'; title = '平局！';    sub = '势均力敌';   setStatus('🤝', '平局！');
+    scores.d++; sessScores.d++;
+    emoji='🤝'; title='平局！';   sub='势均力敌';   setStatus('🤝','平局！');
   } else if (r.winner === pSym) {
-    scores.p++; emoji = '🏆'; title = '你赢了！';  sub = '厉害厉害～'; setStatus('🏆', '你赢了！');
+    scores.p++; sessScores.p++;
+    emoji='🏆'; title='你赢了！'; sub='厉害厉害～'; setStatus('🏆','你赢了！');
   } else {
-    scores.a++; emoji = '🤖'; title = '电脑赢了';  sub = '再接再厉！'; setStatus('😵', '电脑赢了！');
+    scores.a++; sessScores.a++;
+    emoji='🤖'; title='电脑赢了'; sub='再接再厉！'; setStatus('😵','电脑赢了！');
   }
+  sessGames++;
   refreshScores();
+  refreshSessUI();
+
   setTimeout(() => showDialog(emoji, title, sub, oldLv, newLv), 750);
 }
 
-// ── 弹窗 ──
+// ── 结果弹窗 ──
 function showDialog(emoji, title, sub, oldLv, newLv) {
   document.getElementById('dlgE').textContent = emoji;
   document.getElementById('dlgT').textContent = title;
   document.getElementById('dlgS').textContent = sub;
-  const lv = document.getElementById('dlgLv');
+
+  const lvEl = document.getElementById('dlgLv');
   if (newLv > oldLv) {
-    lv.style.display = '';
-    lv.textContent = `🎉 熟练度提升：${LEVELS[oldLv].name} → ${LEVELS[newLv].name}`;
-  } else { lv.style.display = 'none'; }
+    lvEl.style.display = '';
+    lvEl.textContent = `🎉 熟练度提升：${LEVELS[oldLv].name} → ${LEVELS[newLv].name}`;
+  } else lvEl.style.display = 'none';
+
+  // 本轮结束时在弹窗内附加对局汇总
+  const sessEl  = document.getElementById('dlgSess');
+  const playBtn = document.getElementById('dlgPlayBtn');
+  if (sessGames >= sessLen) {
+    const winner = sessScores.p > sessScores.a
+      ? `<div class="sw" style="color:#e94560">你赢得了本轮！🏆</div>`
+      : sessScores.a > sessScores.p
+      ? `<div class="sw" style="color:#53d8fb">电脑赢得了本轮！🤖</div>`
+      : `<div class="sw" style="color:rgba(255,255,255,0.6)">本轮平手！🤝</div>`;
+    sessEl.innerHTML = `本轮结束（共 ${sessLen} 局）<br>
+      你 <b>${sessScores.p}</b> 胜 &nbsp;·&nbsp; 平 <b>${sessScores.d}</b> &nbsp;·&nbsp; 电脑 <b>${sessScores.a}</b> 胜
+      ${winner}`;
+    sessEl.style.display = '';
+    playBtn.textContent = '开始新一轮';
+    playBtn.onclick = startNewSession;
+  } else {
+    sessEl.style.display = 'none';
+    playBtn.textContent = '再来一局';
+    playBtn.onclick = newGame;
+  }
+
   document.getElementById('overlay').classList.add('show');
 }
 function closeDialog() { document.getElementById('overlay').classList.remove('show'); }
+function startNewSession() {
+  sessGames = 0; sessScores = {p:0, a:0, d:0};
+  refreshSessUI(); closeDialog(); newGame();
+}
 
-// ── Minimax + Alpha-Beta 剪枝 ──
+// ── Minimax + Alpha-Beta ──
 function minimax(depth, isMax, alpha, beta) {
   const r = checkWin();
   if (r) {
@@ -562,14 +666,12 @@ function minimax(depth, isMax, alpha, beta) {
   }
   const emp = board.map((v,i) => v === null ? i : null).filter(i => i !== null);
   if (!emp.length) return 0;
-
   if (isMax) {
     let best = -Infinity;
     for (const i of emp) {
       board[i] = aSym;
       best = Math.max(best, minimax(depth+1, false, alpha, beta));
-      board[i] = null;
-      alpha = Math.max(alpha, best);
+      board[i] = null; alpha = Math.max(alpha, best);
       if (beta <= alpha) break;
     }
     return best;
@@ -578,8 +680,7 @@ function minimax(depth, isMax, alpha, beta) {
     for (const i of emp) {
       board[i] = pSym;
       best = Math.min(best, minimax(depth+1, true, alpha, beta));
-      board[i] = null;
-      beta = Math.min(beta, best);
+      board[i] = null; beta = Math.min(beta, best);
       if (beta <= alpha) break;
     }
     return best;
@@ -591,6 +692,7 @@ function resetScores() { scores = {p:0, a:0, d:0}; refreshScores(); }
 // ── 初始化 ──
 refreshAIStatus(stats.games);
 refreshScores();
+refreshSessUI();
 newGame();
 </script>
 </body>
