@@ -5,714 +5,580 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>井字棋</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
-    font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #e0e0e0;
-  }
+body {
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  color: #e0e0e0; padding: 20px;
+}
 
-  .container {
-    width: 420px;
-    padding: 30px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.1);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-    backdrop-filter: blur(10px);
-  }
+.container {
+  width: 720px; max-width: 100%; padding: 26px 28px;
+  background: rgba(255,255,255,0.05); border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
 
-  h1 {
-    text-align: center;
-    font-size: 2rem;
-    letter-spacing: 6px;
-    margin-bottom: 6px;
-    background: linear-gradient(90deg, #e94560, #0f3460, #53d8fb);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
+h1 {
+  text-align: center; font-size: 1.75rem; letter-spacing: 6px; margin-bottom: 4px;
+  background: linear-gradient(90deg, #e94560, #53d8fb);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.subtitle {
+  text-align: center; font-size: 0.68rem; color: rgba(255,255,255,0.28);
+  letter-spacing: 3px; margin-bottom: 18px;
+}
 
-  .subtitle {
-    text-align: center;
-    font-size: 0.8rem;
-    color: rgba(255,255,255,0.4);
-    letter-spacing: 2px;
-    margin-bottom: 24px;
-  }
+/* ── AI 状态栏 ── */
+.ai-status {
+  display: flex; align-items: center; gap: 14px;
+  background: rgba(255,255,255,0.05); border-radius: 12px;
+  padding: 10px 16px; margin-bottom: 13px;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.ai-stat { text-align: center; flex-shrink: 0; }
+.ai-stat-label { font-size: 0.62rem; color: rgba(255,255,255,0.36); letter-spacing: 1px; margin-bottom: 3px; }
+.ai-stat-value { font-size: 1rem; font-weight: bold; color: #53d8fb; }
+.xp-wrap { flex: 1; }
+.xp-bg { height: 5px; background: rgba(255,255,255,0.09); border-radius: 3px; overflow: hidden; }
+.xp-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #53d8fb, #e94560); transition: width .6s; }
+.xp-note { font-size: 0.59rem; color: rgba(255,255,255,0.27); margin-top: 2px; text-align: right; }
+.badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.82rem; font-weight: bold; letter-spacing: 1px; }
+.lv0 { background: rgba(150,150,150,.2); color: #aaa; }
+.lv1 { background: rgba(76,175,80,.2);  color: #81c784; }
+.lv2 { background: rgba(33,150,243,.2); color: #64b5f6; }
+.lv3 { background: rgba(156,39,176,.2); color: #ce93d8; }
+.lv4 { background: rgba(255,152,0,.2);  color: #ffb74d; }
+.lv5 { background: rgba(233,45,96,.2);  color: #f06292; }
 
-  /* 计算机状态栏 */
-  .ai-status {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(255,255,255,0.06);
-    border-radius: 12px;
-    padding: 12px 18px;
-    margin-bottom: 20px;
-    border: 1px solid rgba(255,255,255,0.08);
-  }
+/* ── 先后手 ── */
+.choose { margin-bottom: 13px; text-align: center; }
+.choose-label { font-size: 0.7rem; color: rgba(255,255,255,0.4); letter-spacing: 1px; margin-bottom: 7px; }
+.choose-btns { display: flex; gap: 10px; justify-content: center; }
+.cbtn {
+  flex: 1; max-width: 160px; padding: 7px 0;
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+  background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.48);
+  cursor: pointer; font-size: 0.82rem; letter-spacing: 1px; transition: all .2s;
+}
+.cbtn:hover { background: rgba(255,255,255,0.09); color: #fff; }
+.cbtn.active { background: rgba(83,216,251,0.15); border-color: #53d8fb; color: #53d8fb; }
 
-  .ai-status-item {
-    text-align: center;
-  }
+/* ── 主区域：棋盘 + 思考面板 ── */
+.game-area { display: flex; gap: 16px; margin-bottom: 13px; align-items: flex-start; }
 
-  .ai-status-label {
-    font-size: 0.68rem;
-    color: rgba(255,255,255,0.4);
-    letter-spacing: 1px;
-    margin-bottom: 4px;
-  }
+/* ── 棋盘（固定尺寸，永不变形）── */
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 90px);
+  grid-template-rows: repeat(3, 90px);
+  gap: 8px;
+  flex-shrink: 0;
+}
+.cell {
+  width: 90px; height: 90px;
+  background: rgba(255,255,255,0.06); border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: background .18s, border-color .18s, transform .15s, box-shadow .2s;
+  user-select: none; flex-shrink: 0;
+}
+.cell:hover:not(.taken):not(.ai-turn) {
+  background: rgba(83,216,251,0.1);
+  border-color: rgba(83,216,251,0.3);
+  transform: scale(1.04);
+}
+.cell.taken, .cell.ai-turn { cursor: default; }
 
-  .ai-status-value {
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: #53d8fb;
-  }
+/* 棋子符号（绝对定位，不撑大格子）*/
+.cell-mark {
+  font-size: 2.4rem; line-height: 1;
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%) scale(1);
+  animation: pop .22s cubic-bezier(.34,1.56,.64,1);
+  pointer-events: none;
+}
+.cell.X .cell-mark { color: #e94560; }
+.cell.O .cell-mark { color: #53d8fb; }
+@keyframes pop {
+  from { transform: translate(-50%,-50%) scale(0) rotate(-20deg); opacity: 0; }
+  to   { transform: translate(-50%,-50%) scale(1) rotate(0); opacity: 1; }
+}
 
-  .proficiency-badge {
-    display: inline-block;
-    padding: 3px 12px;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    font-weight: bold;
-    letter-spacing: 1px;
-  }
+.cell.win-cell { animation: winPulse .65s ease infinite alternate; }
+@keyframes winPulse {
+  from { transform: scale(1);    box-shadow: 0 0 6px rgba(255,215,0,.25); }
+  to   { transform: scale(1.07); box-shadow: 0 0 18px rgba(255,215,0,.65); border-color: rgba(255,215,0,.75); }
+}
 
-  .level-0 { background: rgba(150,150,150,0.3); color: #aaa; }
-  .level-1 { background: rgba(76,175,80,0.3); color: #81c784; }
-  .level-2 { background: rgba(33,150,243,0.3); color: #64b5f6; }
-  .level-3 { background: rgba(156,39,176,0.3); color: #ce93d8; }
-  .level-4 { background: rgba(255,152,0,0.3); color: #ffb74d; }
-  .level-5 { background: rgba(233,45,96,0.3); color: #f06292; }
+/* 胜率叠加层（绝对定位，不撑大格子）*/
+.rate-ov {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  animation: fadeIn .2s ease; pointer-events: none; z-index: 2;
+}
+.rate-pct { font-size: 1.2rem; font-weight: bold; line-height: 1; }
+.rate-lbl { font-size: 0.56rem; opacity: .6; margin-top: 4px; letter-spacing: 1px; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-  .xp-bar-wrap {
-    flex: 1;
-    margin: 0 16px;
-  }
+/* ── 思考面板 ── */
+.think-panel {
+  flex: 1;
+  background: rgba(0,0,0,0.22); border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.06); padding: 13px;
+  height: 286px; display: flex; flex-direction: column; overflow: hidden;
+}
+.tp-title {
+  font-size: 0.68rem; color: rgba(255,255,255,0.36); letter-spacing: 2px;
+  padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 8px; flex-shrink: 0;
+}
+.tp-log {
+  flex: 1; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.tp-log::-webkit-scrollbar { width: 2px; }
+.tp-log::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 1px; }
 
-  .xp-bar-bg {
-    height: 6px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 3px;
-    overflow: hidden;
-  }
+/* 思考面板条目 */
+.tpe { font-size: 0.71rem; animation: slideIn .22s ease; }
+.tpe.info { color: rgba(255,255,255,0.33); font-style: italic; }
+.tpe.scan { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
+.tpe.conclude { color: #53d8fb; font-weight: bold; padding: 3px 0; margin-top: 2px; }
+.tpe.updated {
+  color: #ffd700; font-weight: bold; padding: 6px 8px; margin-top: 5px;
+  background: rgba(255,215,0,0.08); border-radius: 6px;
+  border: 1px solid rgba(255,215,0,0.22);
+  animation: updatedPop .4s ease;
+}
+@keyframes updatedPop {
+  from { transform: scale(0.92); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+.tp-cname { flex-shrink: 0; width: 36px; color: rgba(255,255,255,0.52); font-size: 0.69rem; }
+.tp-bar { flex: 1; height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
+.tp-fill { height: 100%; border-radius: 2px; }
+.tp-num { flex-shrink: 0; width: 36px; text-align: right; font-size: 0.69rem; font-weight: bold; }
+@keyframes slideIn { from { opacity: 0; transform: translateX(-5px); } to { opacity: 1; transform: translateX(0); } }
 
-  .xp-bar-fill {
-    height: 100%;
-    border-radius: 3px;
-    background: linear-gradient(90deg, #53d8fb, #e94560);
-    transition: width 0.6s ease;
-  }
+/* ── 状态栏 ── */
+.status-bar {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  height: 29px; margin-bottom: 11px; font-size: 0.87rem;
+}
+.s-icon { font-size: 1.05rem; }
+.s-text { color: rgba(255,255,255,0.7); letter-spacing: 1px; }
+.s-blink { color: #53d8fb; animation: blink .85s step-start infinite; }
+@keyframes blink { 50% { opacity: .22; } }
 
-  .xp-label {
-    font-size: 0.65rem;
-    color: rgba(255,255,255,0.35);
-    margin-top: 3px;
-    text-align: right;
-  }
+/* ── 分数 ── */
+.score-bar { display: flex; justify-content: space-around; margin-bottom: 13px; text-align: center; }
+.s-who { font-size: 0.63rem; color: rgba(255,255,255,0.34); letter-spacing: 1px; margin-bottom: 1px; }
+.s-num { font-size: 1.4rem; font-weight: bold; }
+.s-player .s-num { color: #e94560; }
+.s-ai     .s-num { color: #53d8fb; }
+.s-draw   .s-num { color: rgba(255,255,255,0.4); }
 
-  /* 选手选择 */
-  .choose-section {
-    margin-bottom: 18px;
-    text-align: center;
-  }
+/* ── 按钮 ── */
+.btn-row { display: flex; gap: 10px; }
+.btn { flex: 1; padding: 10px 0; border: none; border-radius: 10px; font-size: 0.86rem; letter-spacing: 2px; cursor: pointer; transition: all .2s; font-weight: bold; }
+.btn-p { background: linear-gradient(135deg, #e94560, #c0392b); color: #fff; box-shadow: 0 4px 14px rgba(233,69,96,.35); }
+.btn-p:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(233,69,96,.45); }
+.btn-s { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.48); border: 1px solid rgba(255,255,255,0.09); }
+.btn-s:hover { background: rgba(255,255,255,0.11); color: #fff; }
 
-  .choose-label {
-    font-size: 0.78rem;
-    color: rgba(255,255,255,0.5);
-    margin-bottom: 10px;
-    letter-spacing: 1px;
-  }
-
-  .choose-btns {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-  }
-
-  .choose-btn {
-    flex: 1;
-    padding: 9px 0;
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 10px;
-    background: rgba(255,255,255,0.05);
-    color: rgba(255,255,255,0.6);
-    cursor: pointer;
-    font-size: 0.85rem;
-    letter-spacing: 1px;
-    transition: all 0.2s;
-  }
-
-  .choose-btn:hover {
-    background: rgba(255,255,255,0.1);
-    color: #fff;
-  }
-
-  .choose-btn.active {
-    background: rgba(83,216,251,0.2);
-    border-color: #53d8fb;
-    color: #53d8fb;
-  }
-
-  /* 棋盘 */
-  .board-wrap {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 18px;
-  }
-
-  .board {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    width: 300px;
-    height: 300px;
-  }
-
-  .cell {
-    background: rgba(255,255,255,0.06);
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.08);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.8rem;
-    cursor: pointer;
-    transition: all 0.15s;
-    user-select: none;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .cell:hover:not(.taken) {
-    background: rgba(83,216,251,0.1);
-    border-color: rgba(83,216,251,0.3);
-    transform: scale(1.03);
-  }
-
-  .cell.taken { cursor: default; }
-
-  .cell.X { color: #e94560; }
-  .cell.O { color: #53d8fb; }
-
-  .cell.win-cell {
-    background: rgba(255,215,0,0.15);
-    border-color: rgba(255,215,0,0.5);
-    animation: pulse 0.6s ease infinite alternate;
-  }
-
-  @keyframes pulse {
-    from { transform: scale(1); }
-    to { transform: scale(1.06); }
-  }
-
-  .cell .mark {
-    display: inline-block;
-    animation: pop 0.2s cubic-bezier(0.34,1.56,0.64,1);
-  }
-
-  @keyframes pop {
-    from { transform: scale(0); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-
-  /* 状态信息 */
-  .status-bar {
-    text-align: center;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 16px;
-    font-size: 0.95rem;
-  }
-
-  .status-icon { font-size: 1.2rem; }
-
-  .status-text { color: rgba(255,255,255,0.8); letter-spacing: 1px; }
-
-  .status-thinking {
-    color: #53d8fb;
-    animation: blink 1s step-start infinite;
-  }
-
-  @keyframes blink {
-    50% { opacity: 0.3; }
-  }
-
-  /* 分数 */
-  .score-bar {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 18px;
-    text-align: center;
-  }
-
-  .score-item .score-who {
-    font-size: 0.7rem;
-    color: rgba(255,255,255,0.4);
-    margin-bottom: 2px;
-    letter-spacing: 1px;
-  }
-
-  .score-item .score-num {
-    font-size: 1.6rem;
-    font-weight: bold;
-  }
-
-  .score-item.player .score-num { color: #e94560; }
-  .score-item.ai .score-num { color: #53d8fb; }
-  .score-item.draw .score-num { color: rgba(255,255,255,0.5); }
-
-  /* 按钮 */
-  .btn-row {
-    display: flex;
-    gap: 10px;
-  }
-
-  .btn {
-    flex: 1;
-    padding: 11px 0;
-    border: none;
-    border-radius: 10px;
-    font-size: 0.9rem;
-    letter-spacing: 2px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-weight: bold;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, #e94560, #c0392b);
-    color: #fff;
-    box-shadow: 0 4px 15px rgba(233,69,96,0.4);
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(233,69,96,0.5);
-  }
-
-  .btn-secondary {
-    background: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.6);
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-
-  .btn-secondary:hover {
-    background: rgba(255,255,255,0.13);
-    color: #fff;
-  }
-
-  /* 对话框遮罩 */
-  .overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-  }
-
-  .overlay.show { display: flex; }
-
-  .dialog {
-    background: #16213e;
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 18px;
-    padding: 32px 36px;
-    text-align: center;
-    min-width: 260px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-    animation: slideUp 0.3s ease;
-  }
-
-  @keyframes slideUp {
-    from { transform: translateY(30px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-
-  .dialog-emoji { font-size: 3rem; margin-bottom: 12px; }
-  .dialog-title { font-size: 1.4rem; font-weight: bold; margin-bottom: 6px; }
-  .dialog-sub { font-size: 0.85rem; color: rgba(255,255,255,0.45); margin-bottom: 20px; letter-spacing: 1px; }
-
-  .dialog-level-up {
-    background: rgba(255,215,0,0.1);
-    border: 1px solid rgba(255,215,0,0.3);
-    border-radius: 10px;
-    padding: 10px 16px;
-    margin-bottom: 18px;
-    font-size: 0.85rem;
-    color: #ffd700;
-  }
-
-  .dialog-btns { display: flex; gap: 10px; }
+/* ── 对话框 ── */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.65); align-items: center; justify-content: center; z-index: 100; }
+.overlay.show { display: flex; }
+.dlg {
+  background: #16213e; border: 1px solid rgba(255,255,255,0.11); border-radius: 18px;
+  padding: 28px 30px; text-align: center; min-width: 240px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6); animation: dlgPop .28s ease;
+}
+@keyframes dlgPop { from { transform: scale(.88) translateY(18px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+.dlg-emoji { font-size: 2.7rem; margin-bottom: 10px; }
+.dlg-title { font-size: 1.25rem; font-weight: bold; margin-bottom: 5px; }
+.dlg-sub   { font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-bottom: 14px; letter-spacing: 1px; }
+.dlg-lvup  { background: rgba(255,215,0,.09); border: 1px solid rgba(255,215,0,.25); border-radius: 8px; padding: 7px 12px; margin-bottom: 14px; font-size: 0.8rem; color: #ffd700; }
+.dlg-btns  { display: flex; gap: 10px; }
 </style>
 </head>
 <body>
-
 <div class="container">
   <h1>井字棋</h1>
   <p class="subtitle">TIC · TAC · TOE</p>
 
-  <!-- AI 状态栏 -->
   <div class="ai-status">
-    <div class="ai-status-item">
-      <div class="ai-status-label">练习局数</div>
-      <div class="ai-status-value" id="gamesCount">0</div>
+    <div class="ai-stat">
+      <div class="ai-stat-label">练习局数</div>
+      <div class="ai-stat-value" id="gamesCount">0</div>
     </div>
-    <div class="xp-bar-wrap">
-      <div class="xp-bar-bg">
-        <div class="xp-bar-fill" id="xpBar" style="width:0%"></div>
-      </div>
-      <div class="xp-label" id="xpLabel">0 / 5</div>
+    <div class="xp-wrap">
+      <div class="xp-bg"><div class="xp-fill" id="xpBar" style="width:0%"></div></div>
+      <div class="xp-note" id="xpNote">0 / 5</div>
     </div>
-    <div class="ai-status-item">
-      <div class="ai-status-label">熟练度</div>
-      <div id="profBadge" class="proficiency-badge level-0">萌新</div>
+    <div class="ai-stat">
+      <div class="ai-stat-label">熟练度</div>
+      <div id="profBadge" class="badge lv0">萌新</div>
     </div>
   </div>
 
-  <!-- 先后手选择 -->
-  <div class="choose-section">
+  <div class="choose">
     <div class="choose-label">选择先后手</div>
     <div class="choose-btns">
-      <button class="choose-btn active" id="btnFirst" onclick="setOrder('first')">我先手 ✊</button>
-      <button class="choose-btn" id="btnSecond" onclick="setOrder('second')">我后手 🤖</button>
+      <button class="cbtn active" id="btnFirst"  onclick="setOrder('first')">我先手 ✊</button>
+      <button class="cbtn"        id="btnSecond" onclick="setOrder('second')">我后手 🤖</button>
     </div>
   </div>
 
-  <!-- 棋盘 -->
-  <div class="board-wrap">
+  <div class="game-area">
     <div class="board" id="board"></div>
+    <div class="think-panel">
+      <div class="tp-title">🤖 电脑思考过程</div>
+      <div class="tp-log" id="tpLog">
+        <div class="tpe info">等待电脑落子...</div>
+      </div>
+    </div>
   </div>
 
-  <!-- 状态 -->
   <div class="status-bar">
-    <span class="status-icon" id="statusIcon">🎮</span>
-    <span class="status-text" id="statusText">请落子</span>
+    <span class="s-icon" id="sIcon">🎮</span>
+    <span class="s-text" id="sText">请落子</span>
   </div>
 
-  <!-- 分数 -->
   <div class="score-bar">
-    <div class="score-item player">
-      <div class="score-who">玩家</div>
-      <div class="score-num" id="scorePlayer">0</div>
-    </div>
-    <div class="score-item draw">
-      <div class="score-who">平局</div>
-      <div class="score-num" id="scoreDraw">0</div>
-    </div>
-    <div class="score-item ai">
-      <div class="score-who">电脑</div>
-      <div class="score-num" id="scoreAI">0</div>
-    </div>
+    <div class="s-player"><div class="s-who">玩家</div><div class="s-num" id="scoreP">0</div></div>
+    <div class="s-draw">  <div class="s-who">平局</div><div class="s-num" id="scoreD">0</div></div>
+    <div class="s-ai">    <div class="s-who">电脑</div><div class="s-num" id="scoreA">0</div></div>
   </div>
 
-  <!-- 按钮 -->
   <div class="btn-row">
-    <button class="btn btn-secondary" onclick="resetScores()">清空分数</button>
-    <button class="btn btn-primary" onclick="newGame()">新局 ▶</button>
+    <button class="btn btn-s" onclick="resetScores()">清空分数</button>
+    <button class="btn btn-p" onclick="newGame()">新局 ▶</button>
   </div>
 </div>
 
-<!-- 结果弹窗 -->
 <div class="overlay" id="overlay">
-  <div class="dialog">
-    <div class="dialog-emoji" id="dlgEmoji"></div>
-    <div class="dialog-title" id="dlgTitle"></div>
-    <div class="dialog-sub" id="dlgSub"></div>
-    <div class="dialog-level-up" id="dlgLevelUp" style="display:none"></div>
-    <div class="dialog-btns">
-      <button class="btn btn-secondary" style="flex:1" onclick="closeDialog()">关闭</button>
-      <button class="btn btn-primary" style="flex:1" onclick="newGame()">再来一局</button>
+  <div class="dlg">
+    <div class="dlg-emoji" id="dlgE"></div>
+    <div class="dlg-title" id="dlgT"></div>
+    <div class="dlg-sub"   id="dlgS"></div>
+    <div class="dlg-lvup"  id="dlgLv" style="display:none"></div>
+    <div class="dlg-btns">
+      <button class="btn btn-s" style="flex:1" onclick="closeDialog()">关闭</button>
+      <button class="btn btn-p" style="flex:1" onclick="newGame()">再来一局</button>
     </div>
   </div>
 </div>
 
 <script>
-// ---- 数据持久化 ----
-const STORAGE_KEY = 'ttt_ai_stats';
-
+// ── 持久化 ──
+const STORE = 'ttt_stats_v2';
 function loadStats() {
-  try {
-    const d = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    return d && typeof d.games === 'number' ? d : { games: 0 };
-  } catch { return { games: 0 }; }
+  try { const d = JSON.parse(localStorage.getItem(STORE)); return (d?.games >= 0) ? d : {games:0}; }
+  catch { return {games:0}; }
 }
+function saveStats(s) { localStorage.setItem(STORE, JSON.stringify(s)); }
 
-function saveStats(stats) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
-}
-
-// ---- 熟练度配置 ----
+// ── 熟练度等级 ──
 const LEVELS = [
-  { name: '萌新',   cls: 'level-0', min: 0,   max: 5   },
-  { name: '见习',   cls: 'level-1', min: 5,   max: 15  },
-  { name: '熟练',   cls: 'level-2', min: 15,  max: 30  },
-  { name: '精通',   cls: 'level-3', min: 30,  max: 60  },
-  { name: '大师',   cls: 'level-4', min: 60,  max: 100 },
-  { name: '传说',   cls: 'level-5', min: 100, max: Infinity },
+  {name:'萌新', cls:'lv0', min:0,   max:5},
+  {name:'见习', cls:'lv1', min:5,   max:15},
+  {name:'熟练', cls:'lv2', min:15,  max:30},
+  {name:'精通', cls:'lv3', min:30,  max:60},
+  {name:'大师', cls:'lv4', min:60,  max:100},
+  {name:'传说', cls:'lv5', min:100, max:Infinity},
 ];
-
-function getLevel(games) {
-  for (let i = LEVELS.length - 1; i >= 0; i--) {
-    if (games >= LEVELS[i].min) return i;
-  }
+function getLvIdx(g) {
+  for (let i = LEVELS.length-1; i >= 0; i--) if (g >= LEVELS[i].min) return i;
   return 0;
 }
-
-function updateAIStatus(games, levelUp) {
-  const lvlIdx = getLevel(games);
-  const lvl = LEVELS[lvlIdx];
-  const next = LEVELS[lvlIdx + 1];
-
-  document.getElementById('gamesCount').textContent = games;
-
-  const badge = document.getElementById('profBadge');
-  badge.textContent = lvl.name;
-  badge.className = 'proficiency-badge ' + lvl.cls;
-
-  const xpBar = document.getElementById('xpBar');
-  const xpLabel = document.getElementById('xpLabel');
-  if (next) {
-    const prog = games - lvl.min;
-    const span = lvl.max - lvl.min;
-    const pct = Math.min(100, Math.round(prog / span * 100));
-    xpBar.style.width = pct + '%';
-    xpLabel.textContent = `${prog} / ${span}`;
-  } else {
-    xpBar.style.width = '100%';
-    xpLabel.textContent = '已满级';
-  }
+function refreshAIStatus(g) {
+  const li = getLvIdx(g), lv = LEVELS[li], nx = LEVELS[li+1];
+  document.getElementById('gamesCount').textContent = g;
+  const b = document.getElementById('profBadge');
+  b.textContent = lv.name; b.className = 'badge ' + lv.cls;
+  const fill = document.getElementById('xpBar'), note = document.getElementById('xpNote');
+  if (nx) {
+    const p = g - lv.min, s = lv.max - lv.min;
+    fill.style.width = Math.min(100, Math.round(p/s*100)) + '%';
+    note.textContent = `${p} / ${s}`;
+  } else { fill.style.width = '100%'; note.textContent = '已满级'; }
 }
 
-// ---- 游戏状态 ----
+// ── 格子名称（用于思考面板）──
+const CNAMES = ['左上','上方','右上','左侧','中间','右侧','左下','下方','右下'];
+
+// ── 游戏状态 ──
 let board = Array(9).fill(null);
-let playerSymbol = 'X'; // 玩家符号
-let aiSymbol = 'O';
-let currentTurn = 'player'; // 'player' | 'ai'
-let gameOver = false;
+let pSym = 'X', aSym = 'O';
+let turn  = 'player';
+let over  = false;
 let playerFirst = true;
-let scores = { player: 0, ai: 0, draw: 0 };
-let stats = loadStats();
-let aiThinking = false;
+let gid   = 0;          // 用于取消旧异步操作
+let scores = {p:0, a:0, d:0};
+let stats  = loadStats();
 
-const WIN_LINES = [
-  [0,1,2],[3,4,5],[6,7,8],
-  [0,3,6],[1,4,7],[2,5,8],
-  [0,4,8],[2,4,6]
-];
+const WINS = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 
-// ---- 渲染棋盘 ----
+// ── 渲染棋盘 ──
 function renderBoard(winCells = []) {
-  const boardEl = document.getElementById('board');
-  boardEl.innerHTML = '';
-  board.forEach((val, i) => {
-    const cell = document.createElement('div');
-    cell.className = 'cell' + (val ? ' taken ' + val : '') + (winCells.includes(i) ? ' win-cell' : '');
-    if (val) cell.innerHTML = `<span class="mark">${val === 'X' ? '✕' : '○'}</span>`;
-    cell.addEventListener('click', () => playerMove(i));
-    boardEl.appendChild(cell);
+  const el = document.getElementById('board');
+  el.innerHTML = '';
+  board.forEach((v, i) => {
+    const c = document.createElement('div');
+    c.className = 'cell'
+      + (v ? ' taken ' + v : '')
+      + (winCells.includes(i) ? ' win-cell' : '')
+      + (!over && turn === 'ai' ? ' ai-turn' : '');
+    if (v) {
+      const m = document.createElement('span');
+      m.className = 'cell-mark';
+      m.textContent = v === 'X' ? '✕' : '○';
+      c.appendChild(m);
+    }
+    c.addEventListener('click', () => onCellClick(i));
+    el.appendChild(c);
   });
 }
+const getCells = () => document.querySelectorAll('#board .cell');
 
-function setStatus(icon, text, cls = '') {
-  document.getElementById('statusIcon').textContent = icon;
-  const el = document.getElementById('statusText');
+function setStatus(icon, text, blink = false) {
+  document.getElementById('sIcon').textContent = icon;
+  const el = document.getElementById('sText');
   el.textContent = text;
-  el.className = 'status-text ' + cls;
+  el.className = 's-text' + (blink ? ' s-blink' : '');
+}
+function refreshScores() {
+  document.getElementById('scoreP').textContent = scores.p;
+  document.getElementById('scoreA').textContent = scores.a;
+  document.getElementById('scoreD').textContent = scores.d;
 }
 
-function updateScoreUI() {
-  document.getElementById('scorePlayer').textContent = scores.player;
-  document.getElementById('scoreAI').textContent = scores.ai;
-  document.getElementById('scoreDraw').textContent = scores.draw;
+// ── 思考面板工具 ──
+function clearTP() { document.getElementById('tpLog').innerHTML = ''; }
+function addTPRaw(html) {
+  const log = document.getElementById('tpLog');
+  log.insertAdjacentHTML('beforeend', html);
+  log.scrollTop = log.scrollHeight;
+}
+function addTPInfo(t)    { addTPRaw(`<div class="tpe info">${t}</div>`); }
+function addTPConclude(t){ addTPRaw(`<div class="tpe conclude">${t}</div>`); }
+function addTPUpdated()  { addTPRaw(`<div class="tpe updated">✓ 已更新落子胜率</div>`); }
+function addTPScan(name, rate) {
+  const hue = Math.round(rate * 1.2);
+  addTPRaw(`
+    <div class="tpe scan">
+      <span class="tp-cname">${name}</span>
+      <div class="tp-bar">
+        <div class="tp-fill" style="width:${rate}%;background:hsl(${hue},70%,44%)"></div>
+      </div>
+      <span class="tp-num" style="color:hsl(${hue},70%,58%)">${rate}%</span>
+    </div>`);
 }
 
-// ---- 先后手切换 ----
-function setOrder(order) {
-  playerFirst = (order === 'first');
-  document.getElementById('btnFirst').classList.toggle('active', playerFirst);
+// ── 胜率映射（minimax 分 -10~+10 → 0~100%）──
+function scoreToRate(s) { return Math.round(((s + 10) / 20) * 100); }
+
+// ── 在格子上显示胜率 ──
+function showRate(idx, rate) {
+  const cs = getCells();
+  const c = cs[idx];
+  if (!c || c.classList.contains('taken')) return;
+  const hue   = Math.round(rate * 1.2);
+  const alpha = 0.18 + Math.abs(rate - 50) / 50 * 0.38;
+  c.style.background   = `hsla(${hue},75%,27%,${alpha})`;
+  c.style.borderColor  = `hsla(${hue},75%,50%,${alpha + 0.2})`;
+  const ov = document.createElement('div');
+  ov.className = 'rate-ov';
+  ov.innerHTML = `
+    <span class="rate-pct" style="color:hsl(${hue},82%,64%)">${rate}%</span>
+    <span class="rate-lbl" style="color:hsl(${hue},60%,52%)">胜率</span>`;
+  c.appendChild(ov);
+}
+function highlightBest(idx) {
+  const c = getCells()[idx];
+  if (!c) return;
+  c.style.transform   = 'scale(1.08)';
+  c.style.boxShadow   = '0 0 18px rgba(83,216,251,0.6)';
+  c.style.borderColor = 'rgba(83,216,251,0.85)';
+}
+
+// ── 延迟 ──
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
+// ── 先后手切换 ──
+function setOrder(o) {
+  playerFirst = (o === 'first');
+  document.getElementById('btnFirst') .classList.toggle('active',  playerFirst);
   document.getElementById('btnSecond').classList.toggle('active', !playerFirst);
   newGame();
 }
 
-// ---- 新局 ----
+// ── 新局 ──
 function newGame() {
   closeDialog();
+  gid++;
   board = Array(9).fill(null);
-  gameOver = false;
-  aiThinking = false;
-
+  over  = false;
+  clearTP();
   if (playerFirst) {
-    playerSymbol = 'X'; aiSymbol = 'O';
-    currentTurn = 'player';
+    pSym = 'X'; aSym = 'O'; turn = 'player';
     setStatus('🎮', '轮到你了，请落子');
+    addTPInfo('等待玩家落子...');
+    renderBoard();
   } else {
-    playerSymbol = 'O'; aiSymbol = 'X';
-    currentTurn = 'ai';
-    setStatus('🤖', '电脑思考中...', 'status-thinking');
-  }
-
-  renderBoard();
-
-  if (currentTurn === 'ai') {
-    setTimeout(doAIMove, 600);
+    pSym = 'O'; aSym = 'X'; turn = 'ai';
+    setStatus('🤖', '电脑思考中...', true);
+    renderBoard();
+    const g = gid;
+    setTimeout(() => runAI(g), 400);
   }
 }
 
-// ---- 玩家落子 ----
-function playerMove(i) {
-  if (gameOver || aiThinking || currentTurn !== 'player') return;
-  if (board[i]) return;
-
-  board[i] = playerSymbol;
+// ── 玩家落子 ──
+function onCellClick(i) {
+  if (over || turn !== 'player' || board[i]) return;
+  board[i] = pSym;
+  const r = checkWin();
+  if (r) { renderBoard(); endGame(r); return; }
+  turn = 'ai';
+  setStatus('🤖', '电脑思考中...', true);
   renderBoard();
-
-  const result = checkResult();
-  if (result) { endGame(result); return; }
-
-  currentTurn = 'ai';
-  aiThinking = true;
-  setStatus('🤖', '电脑思考中...', 'status-thinking');
-  setTimeout(doAIMove, 400 + Math.random() * 300);
+  const g = gid;
+  setTimeout(() => runAI(g), 150);
 }
 
-// ---- AI 落子 ----
-function doAIMove() {
-  if (gameOver) return;
-  const move = getBestMove();
-  board[move] = aiSymbol;
-  aiThinking = false;
+// ── AI 落子（带思考动画）──
+async function runAI(g) {
+  if (over || g !== gid) return;
+
+  const empty = board.map((v,i) => v === null ? i : null).filter(i => i !== null);
+  if (!empty.length) return;
+
+  // 计算每个空格的 minimax 分数
+  const rawScores = {}, rates = {};
+  let bestS = -Infinity, bestM = empty[0];
+  for (const i of empty) {
+    board[i] = aSym;
+    const s = minimax(0, false, -Infinity, Infinity);
+    board[i] = null;
+    rawScores[i] = s;
+    rates[i] = scoreToRate(s);
+    if (s > bestS) { bestS = s; bestM = i; }
+  }
+
+  // ── 思考动画：逐格展示胜率 ──
+  clearTP();
+  addTPInfo('开始分析每个落子位置...');
+
+  for (const i of [...empty].sort((a,b) => a - b)) {
+    await delay(260);
+    if (g !== gid) return;
+    showRate(i, rates[i]);
+    addTPScan(CNAMES[i], rates[i]);
+  }
+
+  await delay(360);
+  if (g !== gid) return;
+
+  // 高亮最佳格子
+  highlightBest(bestM);
+  addTPConclude(`→ 选择${CNAMES[bestM]}（胜率 ${rates[bestM]}%）`);
+
+  await delay(520);
+  if (g !== gid) return;
+
+  // 落子，重新渲染（自动清除胜率叠加层）
+  board[bestM] = aSym;
+  turn = 'player';
   renderBoard();
 
-  const result = checkResult();
-  if (result) { endGame(result); return; }
-
-  currentTurn = 'player';
+  const r = checkWin();
+  if (r) { endGame(r); return; }
   setStatus('🎮', '轮到你了，请落子');
 }
 
-// ---- 判断结果 ----
-function checkResult() {
-  for (const line of WIN_LINES) {
-    const [a, b, c] = line;
-    if (board[a] && board[a] === board[b] && board[b] === board[c]) {
-      return { winner: board[a], line };
-    }
+// ── 胜负判断 ──
+function checkWin() {
+  for (const [a,b,c] of WINS) {
+    if (board[a] && board[a] === board[b] && board[b] === board[c])
+      return { winner: board[a], line: [a,b,c] };
   }
   if (board.every(v => v)) return { winner: 'draw', line: [] };
   return null;
 }
 
-// ---- 结束处理 ----
-function endGame(result) {
-  gameOver = true;
-
-  const oldGames = stats.games;
-  const oldLevel = getLevel(oldGames);
+// ── 结局处理 ──
+function endGame(r) {
+  over = true;
+  const oldLv = getLvIdx(stats.games);
   stats.games++;
-  const newLevel = getLevel(stats.games);
   saveStats(stats);
-  updateAIStatus(stats.games);
+  refreshAIStatus(stats.games);
+  const newLv = getLvIdx(stats.games);
 
-  let winCells = result.line || [];
+  renderBoard(r.line);
+  addTPUpdated();   // "已更新落子胜率"
 
-  if (result.winner === 'draw') {
-    scores.draw++;
-    renderBoard(winCells);
-    setStatus('🤝', '平局！');
-    setTimeout(() => showDialog('🤝', '平局！', '势均力敌', null, oldLevel, newLevel), 600);
-  } else if (result.winner === playerSymbol) {
-    scores.player++;
-    renderBoard(winCells);
-    setStatus('🏆', '你赢了！');
-    setTimeout(() => showDialog('🏆', '你赢了！', '厉害厉害～', null, oldLevel, newLevel), 600);
+  let emoji, title, sub;
+  if (r.winner === 'draw') {
+    scores.d++; emoji = '🤝'; title = '平局！';    sub = '势均力敌';   setStatus('🤝', '平局！');
+  } else if (r.winner === pSym) {
+    scores.p++; emoji = '🏆'; title = '你赢了！';  sub = '厉害厉害～'; setStatus('🏆', '你赢了！');
   } else {
-    scores.ai++;
-    renderBoard(winCells);
-    setStatus('😵', '电脑赢了！');
-    setTimeout(() => showDialog('🤖', '电脑赢了', '再接再厉！', null, oldLevel, newLevel), 600);
+    scores.a++; emoji = '🤖'; title = '电脑赢了';  sub = '再接再厉！'; setStatus('😵', '电脑赢了！');
   }
-
-  updateScoreUI();
+  refreshScores();
+  setTimeout(() => showDialog(emoji, title, sub, oldLv, newLv), 750);
 }
 
-// ---- 弹窗 ----
-function showDialog(emoji, title, sub, extra, oldLevel, newLevel) {
-  document.getElementById('dlgEmoji').textContent = emoji;
-  document.getElementById('dlgTitle').textContent = title;
-  document.getElementById('dlgSub').textContent = sub;
-
-  const lvlUpEl = document.getElementById('dlgLevelUp');
-  if (newLevel > oldLevel) {
-    lvlUpEl.style.display = '';
-    lvlUpEl.textContent = `🎉 熟练度提升：${LEVELS[oldLevel].name} → ${LEVELS[newLevel].name}`;
-  } else {
-    lvlUpEl.style.display = 'none';
-  }
-
+// ── 弹窗 ──
+function showDialog(emoji, title, sub, oldLv, newLv) {
+  document.getElementById('dlgE').textContent = emoji;
+  document.getElementById('dlgT').textContent = title;
+  document.getElementById('dlgS').textContent = sub;
+  const lv = document.getElementById('dlgLv');
+  if (newLv > oldLv) {
+    lv.style.display = '';
+    lv.textContent = `🎉 熟练度提升：${LEVELS[oldLv].name} → ${LEVELS[newLv].name}`;
+  } else { lv.style.display = 'none'; }
   document.getElementById('overlay').classList.add('show');
 }
+function closeDialog() { document.getElementById('overlay').classList.remove('show'); }
 
-function closeDialog() {
-  document.getElementById('overlay').classList.remove('show');
-}
-
-// ---- Minimax AI ----
-function getBestMove() {
-  const empty = board.map((v,i) => v ? null : i).filter(i => i !== null);
-  if (empty.length === 9) {
-    // 首手随机选角或中心
-    const preferred = [0, 2, 4, 6, 8];
-    return preferred[Math.floor(Math.random() * preferred.length)];
-  }
-
-  let bestScore = -Infinity;
-  let bestMove = empty[0];
-  for (const i of empty) {
-    board[i] = aiSymbol;
-    const score = minimax(board, 0, false, -Infinity, Infinity);
-    board[i] = null;
-    if (score > bestScore) { bestScore = score; bestMove = i; }
-  }
-  return bestMove;
-}
-
-function minimax(b, depth, isMax, alpha, beta) {
-  const result = checkResult();
-  if (result) {
-    if (result.winner === aiSymbol) return 10 - depth;
-    if (result.winner === playerSymbol) return depth - 10;
+// ── Minimax + Alpha-Beta 剪枝 ──
+function minimax(depth, isMax, alpha, beta) {
+  const r = checkWin();
+  if (r) {
+    if (r.winner === aSym) return 10 - depth;
+    if (r.winner === pSym) return depth - 10;
     return 0;
   }
+  const emp = board.map((v,i) => v === null ? i : null).filter(i => i !== null);
+  if (!emp.length) return 0;
 
-  const empty = b.map((v,i) => v ? null : i).filter(i => i !== null);
   if (isMax) {
     let best = -Infinity;
-    for (const i of empty) {
-      b[i] = aiSymbol;
-      best = Math.max(best, minimax(b, depth+1, false, alpha, beta));
-      b[i] = null;
+    for (const i of emp) {
+      board[i] = aSym;
+      best = Math.max(best, minimax(depth+1, false, alpha, beta));
+      board[i] = null;
       alpha = Math.max(alpha, best);
       if (beta <= alpha) break;
     }
     return best;
   } else {
     let best = Infinity;
-    for (const i of empty) {
-      b[i] = playerSymbol;
-      best = Math.min(best, minimax(b, depth+1, true, alpha, beta));
-      b[i] = null;
+    for (const i of emp) {
+      board[i] = pSym;
+      best = Math.min(best, minimax(depth+1, true, alpha, beta));
+      board[i] = null;
       beta = Math.min(beta, best);
       if (beta <= alpha) break;
     }
@@ -720,15 +586,11 @@ function minimax(b, depth, isMax, alpha, beta) {
   }
 }
 
-// ---- 清空分数 ----
-function resetScores() {
-  scores = { player: 0, ai: 0, draw: 0 };
-  updateScoreUI();
-}
+function resetScores() { scores = {p:0, a:0, d:0}; refreshScores(); }
 
-// ---- 初始化 ----
-updateAIStatus(stats.games);
-updateScoreUI();
+// ── 初始化 ──
+refreshAIStatus(stats.games);
+refreshScores();
 newGame();
 </script>
 </body>
