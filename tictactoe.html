@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>井字棋</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #e0e0e0;
+  }
+
+  .container {
+    width: 420px;
+    padding: 30px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 2rem;
+    letter-spacing: 6px;
+    margin-bottom: 6px;
+    background: linear-gradient(90deg, #e94560, #0f3460, #53d8fb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+  }
+
+  /* 计算机状态栏 */
+  .ai-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 12px 18px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .ai-status-item {
+    text-align: center;
+  }
+
+  .ai-status-label {
+    font-size: 0.68rem;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  .ai-status-value {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #53d8fb;
+  }
+
+  .proficiency-badge {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+
+  .level-0 { background: rgba(150,150,150,0.3); color: #aaa; }
+  .level-1 { background: rgba(76,175,80,0.3); color: #81c784; }
+  .level-2 { background: rgba(33,150,243,0.3); color: #64b5f6; }
+  .level-3 { background: rgba(156,39,176,0.3); color: #ce93d8; }
+  .level-4 { background: rgba(255,152,0,0.3); color: #ffb74d; }
+  .level-5 { background: rgba(233,45,96,0.3); color: #f06292; }
+
+  .xp-bar-wrap {
+    flex: 1;
+    margin: 0 16px;
+  }
+
+  .xp-bar-bg {
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .xp-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #53d8fb, #e94560);
+    transition: width 0.6s ease;
+  }
+
+  .xp-label {
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.35);
+    margin-top: 3px;
+    text-align: right;
+  }
+
+  /* 选手选择 */
+  .choose-section {
+    margin-bottom: 18px;
+    text-align: center;
+  }
+
+  .choose-label {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+  }
+
+  .choose-btns {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .choose-btn {
+    flex: 1;
+    padding: 9px 0;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+
+  .choose-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+  }
+
+  .choose-btn.active {
+    background: rgba(83,216,251,0.2);
+    border-color: #53d8fb;
+    color: #53d8fb;
+  }
+
+  /* 棋盘 */
+  .board-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 18px;
+  }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: 300px;
+    height: 300px;
+  }
+
+  .cell {
+    background: rgba(255,255,255,0.06);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.8rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cell:hover:not(.taken) {
+    background: rgba(83,216,251,0.1);
+    border-color: rgba(83,216,251,0.3);
+    transform: scale(1.03);
+  }
+
+  .cell.taken { cursor: default; }
+
+  .cell.X { color: #e94560; }
+  .cell.O { color: #53d8fb; }
+
+  .cell.win-cell {
+    background: rgba(255,215,0,0.15);
+    border-color: rgba(255,215,0,0.5);
+    animation: pulse 0.6s ease infinite alternate;
+  }
+
+  @keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.06); }
+  }
+
+  .cell .mark {
+    display: inline-block;
+    animation: pop 0.2s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  @keyframes pop {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* 状态信息 */
+  .status-bar {
+    text-align: center;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+  }
+
+  .status-icon { font-size: 1.2rem; }
+
+  .status-text { color: rgba(255,255,255,0.8); letter-spacing: 1px; }
+
+  .status-thinking {
+    color: #53d8fb;
+    animation: blink 1s step-start infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0.3; }
+  }
+
+  /* 分数 */
+  .score-bar {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 18px;
+    text-align: center;
+  }
+
+  .score-item .score-who {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 2px;
+    letter-spacing: 1px;
+  }
+
+  .score-item .score-num {
+    font-size: 1.6rem;
+    font-weight: bold;
+  }
+
+  .score-item.player .score-num { color: #e94560; }
+  .score-item.ai .score-num { color: #53d8fb; }
+  .score-item.draw .score-num { color: rgba(255,255,255,0.5); }
+
+  /* 按钮 */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 11px 0;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: bold;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #e94560, #c0392b);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(233,69,96,0.4);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(233,69,96,0.5);
+  }
+
+  .btn-secondary {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .btn-secondary:hover {
+    background: rgba(255,255,255,0.13);
+    color: #fff;
+  }
+
+  /* 对话框遮罩 */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+
+  .overlay.show { display: flex; }
+
+  .dialog {
+    background: #16213e;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 18px;
+    padding: 32px 36px;
+    text-align: center;
+    min-width: 260px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .dialog-emoji { font-size: 3rem; margin-bottom: 12px; }
+  .dialog-title { font-size: 1.4rem; font-weight: bold; margin-bottom: 6px; }
+  .dialog-sub { font-size: 0.85rem; color: rgba(255,255,255,0.45); margin-bottom: 20px; letter-spacing: 1px; }
+
+  .dialog-level-up {
+    background: rgba(255,215,0,0.1);
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 10px;
+    padding: 10px 16px;
+    margin-bottom: 18px;
+    font-size: 0.85rem;
+    color: #ffd700;
+  }
+
+  .dialog-btns { display: flex; gap: 10px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>井字棋</h1>
+  <p class="subtitle">TIC · TAC · TOE</p>
+
+  <!-- AI 状态栏 -->
+  <div class="ai-status">
+    <div class="ai-status-item">
+      <div class="ai-status-label">练习局数</div>
+      <div class="ai-status-value" id="gamesCount">0</div>
+    </div>
+    <div class="xp-bar-wrap">
+      <div class="xp-bar-bg">
+        <div class="xp-bar-fill" id="xpBar" style="width:0%"></div>
+      </div>
+      <div class="xp-label" id="xpLabel">0 / 5</div>
+    </div>
+    <div class="ai-status-item">
+      <div class="ai-status-label">熟练度</div>
+      <div id="profBadge" class="proficiency-badge level-0">萌新</div>
+    </div>
+  </div>
+
+  <!-- 先后手选择 -->
+  <div class="choose-section">
+    <div class="choose-label">选择先后手</div>
+    <div class="choose-btns">
+      <button class="choose-btn active" id="btnFirst" onclick="setOrder('first')">我先手 ✊</button>
+      <button class="choose-btn" id="btnSecond" onclick="setOrder('second')">我后手 🤖</button>
+    </div>
+  </div>
+
+  <!-- 棋盘 -->
+  <div class="board-wrap">
+    <div class="board" id="board"></div>
+  </div>
+
+  <!-- 状态 -->
+  <div class="status-bar">
+    <span class="status-icon" id="statusIcon">🎮</span>
+    <span class="status-text" id="statusText">请落子</span>
+  </div>
+
+  <!-- 分数 -->
+  <div class="score-bar">
+    <div class="score-item player">
+      <div class="score-who">玩家</div>
+      <div class="score-num" id="scorePlayer">0</div>
+    </div>
+    <div class="score-item draw">
+      <div class="score-who">平局</div>
+      <div class="score-num" id="scoreDraw">0</div>
+    </div>
+    <div class="score-item ai">
+      <div class="score-who">电脑</div>
+      <div class="score-num" id="scoreAI">0</div>
+    </div>
+  </div>
+
+  <!-- 按钮 -->
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="resetScores()">清空分数</button>
+    <button class="btn btn-primary" onclick="newGame()">新局 ▶</button>
+  </div>
+</div>
+
+<!-- 结果弹窗 -->
+<div class="overlay" id="overlay">
+  <div class="dialog">
+    <div class="dialog-emoji" id="dlgEmoji"></div>
+    <div class="dialog-title" id="dlgTitle"></div>
+    <div class="dialog-sub" id="dlgSub"></div>
+    <div class="dialog-level-up" id="dlgLevelUp" style="display:none"></div>
+    <div class="dialog-btns">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeDialog()">关闭</button>
+      <button class="btn btn-primary" style="flex:1" onclick="newGame()">再来一局</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- 数据持久化 ----
+const STORAGE_KEY = 'ttt_ai_stats';
+
+function loadStats() {
+  try {
+    const d = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    return d && typeof d.games === 'number' ? d : { games: 0 };
+  } catch { return { games: 0 }; }
+}
+
+function saveStats(stats) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
+}
+
+// ---- 熟练度配置 ----
+const LEVELS = [
+  { name: '萌新',   cls: 'level-0', min: 0,   max: 5   },
+  { name: '见习',   cls: 'level-1', min: 5,   max: 15  },
+  { name: '熟练',   cls: 'level-2', min: 15,  max: 30  },
+  { name: '精通',   cls: 'level-3', min: 30,  max: 60  },
+  { name: '大师',   cls: 'level-4', min: 60,  max: 100 },
+  { name: '传说',   cls: 'level-5', min: 100, max: Infinity },
+];
+
+function getLevel(games) {
+  for (let i = LEVELS.length - 1; i >= 0; i--) {
+    if (games >= LEVELS[i].min) return i;
+  }
+  return 0;
+}
+
+function updateAIStatus(games, levelUp) {
+  const lvlIdx = getLevel(games);
+  const lvl = LEVELS[lvlIdx];
+  const next = LEVELS[lvlIdx + 1];
+
+  document.getElementById('gamesCount').textContent = games;
+
+  const badge = document.getElementById('profBadge');
+  badge.textContent = lvl.name;
+  badge.className = 'proficiency-badge ' + lvl.cls;
+
+  const xpBar = document.getElementById('xpBar');
+  const xpLabel = document.getElementById('xpLabel');
+  if (next) {
+    const prog = games - lvl.min;
+    const span = lvl.max - lvl.min;
+    const pct = Math.min(100, Math.round(prog / span * 100));
+    xpBar.style.width = pct + '%';
+    xpLabel.textContent = `${prog} / ${span}`;
+  } else {
+    xpBar.style.width = '100%';
+    xpLabel.textContent = '已满级';
+  }
+}
+
+// ---- 游戏状态 ----
+let board = Array(9).fill(null);
+let playerSymbol = 'X'; // 玩家符号
+let aiSymbol = 'O';
+let currentTurn = 'player'; // 'player' | 'ai'
+let gameOver = false;
+let playerFirst = true;
+let scores = { player: 0, ai: 0, draw: 0 };
+let stats = loadStats();
+let aiThinking = false;
+
+const WIN_LINES = [
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
+];
+
+// ---- 渲染棋盘 ----
+function renderBoard(winCells = []) {
+  const boardEl = document.getElementById('board');
+  boardEl.innerHTML = '';
+  board.forEach((val, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'cell' + (val ? ' taken ' + val : '') + (winCells.includes(i) ? ' win-cell' : '');
+    if (val) cell.innerHTML = `<span class="mark">${val === 'X' ? '✕' : '○'}</span>`;
+    cell.addEventListener('click', () => playerMove(i));
+    boardEl.appendChild(cell);
+  });
+}
+
+function setStatus(icon, text, cls = '') {
+  document.getElementById('statusIcon').textContent = icon;
+  const el = document.getElementById('statusText');
+  el.textContent = text;
+  el.className = 'status-text ' + cls;
+}
+
+function updateScoreUI() {
+  document.getElementById('scorePlayer').textContent = scores.player;
+  document.getElementById('scoreAI').textContent = scores.ai;
+  document.getElementById('scoreDraw').textContent = scores.draw;
+}
+
+// ---- 先后手切换 ----
+function setOrder(order) {
+  playerFirst = (order === 'first');
+  document.getElementById('btnFirst').classList.toggle('active', playerFirst);
+  document.getElementById('btnSecond').classList.toggle('active', !playerFirst);
+  newGame();
+}
+
+// ---- 新局 ----
+function newGame() {
+  closeDialog();
+  board = Array(9).fill(null);
+  gameOver = false;
+  aiThinking = false;
+
+  if (playerFirst) {
+    playerSymbol = 'X'; aiSymbol = 'O';
+    currentTurn = 'player';
+    setStatus('🎮', '轮到你了，请落子');
+  } else {
+    playerSymbol = 'O'; aiSymbol = 'X';
+    currentTurn = 'ai';
+    setStatus('🤖', '电脑思考中...', 'status-thinking');
+  }
+
+  renderBoard();
+
+  if (currentTurn === 'ai') {
+    setTimeout(doAIMove, 600);
+  }
+}
+
+// ---- 玩家落子 ----
+function playerMove(i) {
+  if (gameOver || aiThinking || currentTurn !== 'player') return;
+  if (board[i]) return;
+
+  board[i] = playerSymbol;
+  renderBoard();
+
+  const result = checkResult();
+  if (result) { endGame(result); return; }
+
+  currentTurn = 'ai';
+  aiThinking = true;
+  setStatus('🤖', '电脑思考中...', 'status-thinking');
+  setTimeout(doAIMove, 400 + Math.random() * 300);
+}
+
+// ---- AI 落子 ----
+function doAIMove() {
+  if (gameOver) return;
+  const move = getBestMove();
+  board[move] = aiSymbol;
+  aiThinking = false;
+  renderBoard();
+
+  const result = checkResult();
+  if (result) { endGame(result); return; }
+
+  currentTurn = 'player';
+  setStatus('🎮', '轮到你了，请落子');
+}
+
+// ---- 判断结果 ----
+function checkResult() {
+  for (const line of WIN_LINES) {
+    const [a, b, c] = line;
+    if (board[a] && board[a] === board[b] && board[b] === board[c]) {
+      return { winner: board[a], line };
+    }
+  }
+  if (board.every(v => v)) return { winner: 'draw', line: [] };
+  return null;
+}
+
+// ---- 结束处理 ----
+function endGame(result) {
+  gameOver = true;
+
+  const oldGames = stats.games;
+  const oldLevel = getLevel(oldGames);
+  stats.games++;
+  const newLevel = getLevel(stats.games);
+  saveStats(stats);
+  updateAIStatus(stats.games);
+
+  let winCells = result.line || [];
+
+  if (result.winner === 'draw') {
+    scores.draw++;
+    renderBoard(winCells);
+    setStatus('🤝', '平局！');
+    setTimeout(() => showDialog('🤝', '平局！', '势均力敌', null, oldLevel, newLevel), 600);
+  } else if (result.winner === playerSymbol) {
+    scores.player++;
+    renderBoard(winCells);
+    setStatus('🏆', '你赢了！');
+    setTimeout(() => showDialog('🏆', '你赢了！', '厉害厉害～', null, oldLevel, newLevel), 600);
+  } else {
+    scores.ai++;
+    renderBoard(winCells);
+    setStatus('😵', '电脑赢了！');
+    setTimeout(() => showDialog('🤖', '电脑赢了', '再接再厉！', null, oldLevel, newLevel), 600);
+  }
+
+  updateScoreUI();
+}
+
+// ---- 弹窗 ----
+function showDialog(emoji, title, sub, extra, oldLevel, newLevel) {
+  document.getElementById('dlgEmoji').textContent = emoji;
+  document.getElementById('dlgTitle').textContent = title;
+  document.getElementById('dlgSub').textContent = sub;
+
+  const lvlUpEl = document.getElementById('dlgLevelUp');
+  if (newLevel > oldLevel) {
+    lvlUpEl.style.display = '';
+    lvlUpEl.textContent = `🎉 熟练度提升：${LEVELS[oldLevel].name} → ${LEVELS[newLevel].name}`;
+  } else {
+    lvlUpEl.style.display = 'none';
+  }
+
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeDialog() {
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ---- Minimax AI ----
+function getBestMove() {
+  const empty = board.map((v,i) => v ? null : i).filter(i => i !== null);
+  if (empty.length === 9) {
+    // 首手随机选角或中心
+    const preferred = [0, 2, 4, 6, 8];
+    return preferred[Math.floor(Math.random() * preferred.length)];
+  }
+
+  let bestScore = -Infinity;
+  let bestMove = empty[0];
+  for (const i of empty) {
+    board[i] = aiSymbol;
+    const score = minimax(board, 0, false, -Infinity, Infinity);
+    board[i] = null;
+    if (score > bestScore) { bestScore = score; bestMove = i; }
+  }
+  return bestMove;
+}
+
+function minimax(b, depth, isMax, alpha, beta) {
+  const result = checkResult();
+  if (result) {
+    if (result.winner === aiSymbol) return 10 - depth;
+    if (result.winner === playerSymbol) return depth - 10;
+    return 0;
+  }
+
+  const empty = b.map((v,i) => v ? null : i).filter(i => i !== null);
+  if (isMax) {
+    let best = -Infinity;
+    for (const i of empty) {
+      b[i] = aiSymbol;
+      best = Math.max(best, minimax(b, depth+1, false, alpha, beta));
+      b[i] = null;
+      alpha = Math.max(alpha, best);
+      if (beta <= alpha) break;
+    }
+    return best;
+  } else {
+    let best = Infinity;
+    for (const i of empty) {
+      b[i] = playerSymbol;
+      best = Math.min(best, minimax(b, depth+1, true, alpha, beta));
+      b[i] = null;
+      beta = Math.min(beta, best);
+      if (beta <= alpha) break;
+    }
+    return best;
+  }
+}
+
+// ---- 清空分数 ----
+function resetScores() {
+  scores = { player: 0, ai: 0, draw: 0 };
+  updateScoreUI();
+}
+
+// ---- 初始化 ----
+updateAIStatus(stats.games);
+updateScoreUI();
+newGame();
+</script>
+</body>
+</html>
